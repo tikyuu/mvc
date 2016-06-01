@@ -1,5 +1,4 @@
 
-**/app/views/templates_c
-
-**/library/smarty
-!/library/smarty/Smarty.class.php
+app/views/templates_c
+library/smarty
+!/.gitkeep
