@@ -1,12 +1,10 @@
 <?php
-
-// require_once '../views/Smarty.class.php';
-
 /**
 * 
 */
 class Dispatcher
 {
+    const LOGIN_URL = "/Login/login";
     private $sysRoot;
 
     public function setSystemRoot($path)
@@ -15,19 +13,25 @@ class Dispatcher
     }
     public function dispatch()
     {
-        // test
         $param = '';
-        if (isset($_SERVER['REQUEST_URI'])) {
-            $param = ereg_replace('/?$', '', $_SERVER['REQUEST_URI']);
-            $param = ereg_replace('^/', '', $param);
+
+        // セッションチェック
+        if (Session::check()) {
+            $param = $_SERVER['REQUEST_URI'];
+        } else {
+            $param = Dispatcher::LOGIN_URL;
         }
 
+        if (isset($param)) {
+            $param = ereg_replace('/?$', '', $param);
+            $param = ereg_replace('^/', '', $param);
+        }
         $params = array();
         if ('' != $param) {
             $params = explode('/', $param);
         }
 
-        $controller = 'index';
+        $controller = 'Ticket';
         if (0 < count($params)) {
             $controller = $params[0];
         }

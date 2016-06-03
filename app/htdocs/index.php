@@ -20,10 +20,17 @@ require_once LIB_PATH . '/smarty/Smarty.class.php';
 // );
 
 // ModelBase::setConnectionInfo($connInfo);
+// function autoload_model($className) {
+//     $file = ROOT_PATH . '/models/' . $className . '.php';
+//     if (file_exists($file)) {
+//         require_once $file;
+//     }
+// }
 function autoload_mvc($className) {
     $file = LIB_PATH . '/mvc/' . $className . '.php';
     if (file_exists($file)) {
-        require_once LIB_PATH . '/mvc/' . $className . '.php';
+        require_once $file;
+        // require_once LIB_PATH . '/mvc/' . $className . '.php';
     }
 }
 spl_autoload_register('autoload_mvc');

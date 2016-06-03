@@ -5,7 +5,8 @@
 */
 abstract class RequestVariables
 {
-    
+    protected $_values;
+
     function __construct()
     {
         $this->setValues();
