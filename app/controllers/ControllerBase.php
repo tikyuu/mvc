@@ -41,8 +41,11 @@ abstract class ControllerBase
             $methodName = sprintf('%sAction', $this->action);
             $this->$methodName();
 
-            $this->view->display($this->templatePath);
-
+            if (file_exists($this->templatePath)) {
+                $this->view->display($this->templatePath);
+            } else {
+                Log::v_log('not found template View');
+            }
         } catch (SmartyException $e) {
             // $e->message();
             // echo $e->message;
