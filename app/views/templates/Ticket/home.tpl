@@ -12,9 +12,8 @@
                 {foreach from=$ary_th item=v}
                 <th>{$v}</th>
                 {/foreach}
-
                 <!-- <th>edit</th> -->
-             </tr>
+            </tr>
             {foreach from=$d2ary item=ary}
             <tr>
                 {foreach from=$ary key=key item=v}

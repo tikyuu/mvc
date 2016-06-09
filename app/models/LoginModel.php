@@ -24,7 +24,7 @@ class LoginModel extends ModelBase
       $state = $this->pdo->query($sql);
       $res = $state->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-      $e->getMessage();
+      echo $e->getMessage();
       exit;
     }
 

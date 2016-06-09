@@ -14,3 +14,23 @@
 - 各ユーザ画面作成。
 - 各ユーザからチケットの受け渡しを行う。
 - web用バグトラックの完成。
+
+
+## PDO 
+### 必ずtry-catchを書く
+
+### ユーザ入力を伴わない場合
+ユーザ入力を伴わないクエリは単にPDO::queryメソッドを実行。戻り値はPDOStatement  
+またはPDO::execを使用。  
+```php
+$state = $pdo->query('SELECT * FROM people');
+
+// or
+$count = $pdo->exec('UPDATE people SET age = age + 1');
+```
+
+### ユーザ入力を伴う
+PDO::prepare -> PDOStatement::bindValue -> PDOStatement::executeの３ステップでクエリを実行  
+プリペアドステートメント -> プレースホルダ  
+
+

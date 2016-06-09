@@ -1,0 +1,100 @@
+hello[10:32:30] hello world
+[10:35:32] hello world
+[10:35:35] hello world
+[10:35:35] hello world
+[10:35:40] hello world
+[10:46:39] start
+[10:46:39] start
+[10:46:44] start
+[10:46:44] start
+[10:46:45] start
+[10:46:45] start
+[10:49:48] /var/www/html/mvc/app/controllers/LoginController.php
+[10:49:48] /var/www/html/mvc/app/controllers/LoginController.php
+[10:50:59] /var/www/html/mvc/app/controllers/LoginController.php
+[10:50:59] /var/www/html/mvc/app/controllers/LoginController.php
+[10:55:45] Login login
+[10:55:45] Login login
+[10:59:30] Login login
+[10:59:30] not found template View
+[10:59:31] Login login
+[10:59:31] not found template View
+[11:00:29] Login login
+[11:00:29] [Login/login.tpl]not found template View
+[11:00:30] Login login
+[11:00:30] [Login/login.tpl]not found template View
+[11:00:55] Login login
+[11:00:55] [Login/login.tpl] not found tpl
+[11:00:55] Login login
+[11:00:55] [Login/login.tpl] not found tpl
+[11:02:12] Login login
+[11:02:12] [Login/login.tpl] not found template view
+[11:02:12] Login login
+[11:02:12] [Login/login.tpl] not found template view
+[11:02:18] Login login
+[11:02:18] [Login/login.tpl] not found template view
+[11:02:18] Login login
+[11:02:18] [Login/login.tpl] not found template view
+[11:03:02] Login login
+[11:03:02] [ArrayLogin/login.tpl] not found template view
+[11:03:02] Login login
+[11:03:02] [ArrayLogin/login.tpl] not found template view
+[11:03:26] Login login
+[11:03:26] Login login
+[11:03:43] Login login
+[11:03:43] Login login
+[11:04:16] Login login
+[11:04:16] Login login
+[11:05:58] Login login
+[11:05:58] Login login
+[11:06:28] Login login
+[11:06:28] Login login
+[11:12:07] [Login/login.tpl] not found template view
+[11:12:08] [Login/login.tpl] not found template view
+[11:12:11] [Login/login.tpl] not found template view
+[11:12:11] [Login/login.tpl] not found template view
+Log::_: 10 [11:16:50] [Login/login.tpl] not found template view
+Log::_: 10 [11:16:50] [Login/login.tpl] not found template view
+u_log[11:19:36] [Login/login.tpl] not found template view
+u_log[11:19:36] [Login/login.tpl] not found template view
+run[11:19:56] [Login/login.tpl] not found template view
+run[11:19:56] [Login/login.tpl] not found template view
+run[11:20:10] [Login/login.tpl] not found template view
+run[11:20:10] [Login/login.tpl] not found template view
+ControllerBase run 59 [11:21:31] [Login/login.tpl] not found template view
+ControllerBase run 59 [11:21:31] [Login/login.tpl] not found template view
+[11:24:01] ControllerBase run 59 [Login/login.tpl] not found template view
+[11:24:01] ControllerBase run 59 [Login/login.tpl] not found template view
+[11:24:30] [ControllerBase run 59] [Login/login.tpl] not found template view
+[11:24:30] [ControllerBase run 59] [Login/login.tpl] not found template view
+[11:27:28] [ControllerBase run] [Login/login.tpl] not found template view
+[11:27:28] [ControllerBase run] [Login/login.tpl] not found template view
+[11:27:50] [ControllerBase run] [Login/login.tpl] not found template view
+[11:27:50] [ControllerBase run] [Login/login.tpl] not found template view
+[11:28:36] [ControllerBase run] [Login/login.tpl] not found template view
+[11:28:36] [ControllerBase run] [Login/login.tpl] not found template view
+[11:30:49] [ControllerBase partial] /var/www/html/mvc/app/views/templates/Partial/_header_bootstrap.tpl
+[11:30:49] [ControllerBase partial] /var/www/html/mvc/app/views/templates/Partial/_header_bootstrap.tpl
+[11:34:09] [ControllerBase run] [Login/login.tpl] not found template view
+[11:34:09] [ControllerBase run] [Login/login.tpl] not found template view
+[11:34:49] [ControllerBase run] [Login/login.tpl] not found template view
+[11:34:49] [ControllerBase run] [Login/login.tpl] not found template view
+[11:40:30] [ControllerBase run] [Ticket/index.tpl] not found template view
+[11:40:30] [ControllerBase run] [Ticket/index.tpl] not found template view
+[11:40:31] [ControllerBase run] [Ticket/index.tpl] not found template view
+[11:40:31] [ControllerBase run] [Ticket/index.tpl] not found template view
+[11:40:34] [ControllerBase run] [Ticket/index.tpl] not found template view
+[11:40:34] [ControllerBase run] [Ticket/index.tpl] not found template view
+[11:41:29] [ControllerBase run] [Test/index.tpl] not found template view
+[11:41:37] [ControllerBase run] [Ticket/index.tpl] not found template view
+[11:46:26] [ControllerBase run] [/Ticket/index.tpl] not found template view
+[11:46:36] [ControllerBase run] [/Login/login.tpl] not found template view
+[11:51:11] [ControllerBase run] [/var/www/html/mvc/app/views/templates/test/index.tpl] not found template view
+[11:51:44] [ControllerBase run] [/var/www/html/mvc/app/views/templates/test/index.tpl] not found template view
+[11:53:06] [ControllerBase run] [/var/www/html/mvc/app/views/templates/Test/index.tpl] not found template view
+[11:53:40] [ControllerBase run] [/var/www/html/mvc/app/views/templates/Test/index.tpl] not found template view
+[11:53:49] [ControllerBase run] [/var/www/html/mvc/app/views/templates/Test/index.tpl] not found template view
+[11:55:41] [ControllerBase run] [/var/www/html/mvc/app/views/templates/Test/index.tpl] not found template view
+[11:55:57] [ControllerBase run] [/var/www/html/mvc/app/views/templates/login/login.tpl] not found template view
+[13:03:18] [ControllerBase run] err: ControllerBase run
+[15:03:09] [ControllerBase run] err: ControllerBase run

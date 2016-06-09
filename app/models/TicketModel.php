@@ -1,23 +1,44 @@
 <?php
 class TicketModel extends ModelBase
 {
-  protected $errors = array(); // string[]
 
-  public function getUserDB()
+  // @return array([id => ?, name => ?]) 
+  public function getUser()
   {
-  }
-  public function getUserTicket($user)
-  {
-    $sql = sprintf('SELECT name, title, description FROM user INNER JOIN ticket ON user.name = ticket.src_user WHERE user.name = "%s"', $user);
+    $table = 'user';
+    $sql = sprintf('SELECT id, name FROM %s', $table);
     $state = $this->pdo->prepare($sql);
-    if (!$state->execute()) { echo "err execute"; exit; }
+    if (!$state->execute()) { echo "err getUsers"; exit; }
+    $res = $state->fetchAll(PDO::FETCH_ASSOC);
+
+    return $res;
+  }
+  // @return ログ全データ 2次元配列
+  public function getLog()
+  {
+    $table = 'log';
+    $sql = sprintf('SELECT * FROM %s ORDER BY id DESC', $table);
+
+    $state = $this->pdo->prepare($sql);
+    if (!$state->execute()) { echo "err getLog"; exit; }
+    $res = $state->fetchAll(PDO::FETCH_ASSOC);
+
+    return $res;
+  }
+  // @return 2次元配列 array([name => ?, title => ?, description => ?])
+  public function getUserTicket($user_id)
+  {
+    $sql = sprintf('SELECT ticket.id, name, title, description FROM user INNER JOIN ticket ON user.id = ticket.dst_user_id WHERE user.id = "%s" ORDER BY ticket.id DESC', $user_id);
+    $state = $this->pdo->prepare($sql);
+    if (!$state->execute()) { echo "err getUserTicket"; exit; }
     $res = $state->fetchAll(PDO::FETCH_ASSOC);
     return $res;
   }
-  public function getAll()
+  // @return チケット全データ array([key => value ...])
+  public function getAllTicket()
   {
     $table = 'ticket';
-    $sql = 'SELECT * FROM ' . $table;
+    $sql = sprintf('SELECT * FROM %s ORDER BY id DESC', $table);
     $stmt = $this->pdo->query($sql);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
@@ -27,94 +48,132 @@ class TicketModel extends ModelBase
     { 
       if (empty($post[$key]))
       {
-        $this->errors[] = 'empty: ' . $key . '<br>';
+        return 'empty: ' . $key . '<br>';
       }
     }
     else
     {
       if (!isset($post[$key]))
       {
-        $this->errors[] = '!isset: ' . $key . '<br>';
+        return '!isset: ' . $key . '<br>';
       }
     }
+    return '';
   } 
   public function check($post)
   {
-    // isset 空文字許容 empty 空文字禁止
-    $this->_checkPost($post, 'label');
-    $this->_checkPost($post, 'status');
-    $this->_checkPost($post, 'src_user');
-    $this->_checkPost($post, 'dst_user');
-    $this->_checkPost($post, 'title');
-    $this->_checkPost($post, 'description', true);
-    $this->_checkPost($post, 'open_date');
-    $this->_checkPost($post, 'close_date');
+    $error = array();
+    $error[] = $this->_checkPost($post, 'src_user_id');
+    $error[] = $this->_checkPost($post, 'dst_user');
+    $error[] = $this->_checkPost($post, 'title');
+    $error[] = $this->_checkPost($post, 'description', true);
+    $error = array_filter($error);
+    
     if (!empty($this->errors))
     {
       var_dump($this->errors);
       exit;
     }
-
     return true;
-  }
-  public function testAdd()
-  {
-    $sql = 'INSERT INTO ticket (src_user, dst_user, description) VALUES ("aa", "bb", "cc")';
-    try
-    {
-      $state = $this->pdo->prepare($sql);
-      if (!$state->execute())
-      {
-        throw new Exception("実行失敗");
-      }
-    } 
-    catch (Exception $e)
-    {
-      Log::u_log($e->getMessage());
-      exit;
-    }
   }
   public function delete($id)
   {
-    $table = 'ticket';
-    $sql = sprintf('DELETE FROM %s WHERE id = :id', $table);
     try {
-      $state = $this->pdo->prepare($sql);
-      if (!$state) { throw new Exception("err prepare"); }
-      $state->bindValue(':id', $id);
-      if (!$state->execute()) { throw new Exception("実行失敗"); }
-    } catch (Exception $e) {
+
+      // ticket delete prepare
+      $table_ticket = 'ticket';
+      $sql1 = sprintf('DELETE FROM %s WHERE id = :id', $table_ticket);
+      $state1 = $this->pdo->prepare($sql1);
+
+       // log add prepare
+       $data2 = array(
+          "ticket_id" => 1,
+          "description" => "チケットを削除しました。"
+        );
+       $table_log = 'log';
+       $bind2 = $this->bindString($data2);
+       $sql2 = sprintf('INSERT INTO %s ' . $bind2, $table_log);
+       $state2 = $this->pdo->prepare($sql2);
+
+      // トランザクション
+      try {
+        // delete ticket
+        $this->pdo->beginTransaction();
+        $state1->bindValue(':id', $id);
+        $state1->execute();
+
+        // add log
+        foreach ($data2 as $key => $value) {
+          $state2->bindValue(':' . $key, $value);
+        }
+        $state2->execute();
+
+        $this->pdo->commit();
+      } catch (Exception $e) {
+        $this->pdo->rollBack();
+        throw $e;
+      }
+    } catch (PDOException $e) {
+      if(DEBUG){ echo $e->getMessage(); } else { echo ERROR_DB; }
       Log::u_log($e->getMessage());
-      Log::u_log("error");
       exit;
     }
   }
   public function add($post)
   {
-     $data = array(
-      // "label" => intval($post['label']),
-      // "status" => intval($post['status']),
-      "src_user" => $post['src_user'],
-      "dst_user" => $post['dst_user'],
-      "title" => $post['title'],
-      "description" => $post['description']
-      );
+      try{
+        // ticket add prepare
+       $data1 = array(
+        "src_user_id" => $post['src_user_id'],
+        "dst_user_id" => $post['dst_user'],
+        "title" => $post['title'],
+        "description" => $post['description']
+        );
+       $table_ticket = 'ticket';
+       $bind1 = $this->bindString($data1);
+       $sql1 = sprintf('INSERT INTO %s ' . $bind1, $table_ticket);
+       $state1 = $this->pdo->prepare($sql1);
 
-    $table = 'ticket';
-    $bind = $this->bindString($data);
-    $sql = sprintf('INSERT INTO %s ' . $bind, $table);
+       // log add prepare
+       $data2 = array(
+          "ticket_id" => 1,
+          "description" => "チケットを追加しました。"
+        );
+       $table_log = 'log';
+       $bind2 = $this->bindString($data2);
+       $sql2 = sprintf('INSERT INTO %s ' . $bind2, $table_log);
+       $state2 = $this->pdo->prepare($sql2);
 
-    try {
-      $state = $this->pdo->prepare($sql);
-      if (!$state) { throw new Exception("err prepare"); }
-      foreach ($data as $key => $value) {
-        $state->bindValue(':' . $key, $value);
+
+       // トランザクション
+       $this->pdo->beginTransaction();
+       try {
+        // ticket add
+        foreach ($data1 as $key => $value) {
+          $state1->bindValue(':' . $key, $value);
+        }
+        $state1->execute();
+
+        // log add
+        foreach ($data2 as $key => $value) {
+          $state2->bindValue(':' . $key, $value);
+        }
+        $state2->execute();
+
+        // コミット
+        $this->pdo->commit();
+
+      } catch (Exception $e){
+        // ロールバック
+        $this->pdo->rollBack();
+        echo $e->getMessage();
+        throw $e;
       }
-      if (!$state->execute()) { throw new Exception("実行失敗"); }
-    } catch (Exception $e){
-      Log::u_log($e->getMessage());
-      Log::u_log("errror");
-      exit;
+
+    } catch (PDOException $e) {
+        if(DEBUG){ echo $e->getMessage(); } else { echo ERROR_DB; }
+        Log::u_log($e->getMessage());
+        exit;
     }
   }
 }

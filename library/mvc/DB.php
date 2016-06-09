@@ -7,6 +7,12 @@ class DB
     "user" => "arakaki",
     "password" => "arakaki"
   );
+  static private $param = array(
+    PDO::MYSQL_ATTR_READ_DEFAULT_FILE => '/etc/my.cnf',
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_EMULATE_PREPARES => false,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+  );
   static public function connect($conf)
   {
     $t_conf = DB::$conf;
@@ -25,8 +31,7 @@ class DB
 
     try
     {
-      return new PDO($dsn, $t_conf['user'], $t_conf['password'],
-        array(PDO::MYSQL_ATTR_READ_DEFAULT_FILE => '/etc/my.cnf'));
+      return new PDO($dsn, $t_conf['user'], $t_conf['password'], DB::$param);
     }
     catch (PDOException $e)
     {
