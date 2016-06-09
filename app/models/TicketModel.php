@@ -1,26 +1,23 @@
 <?php
 class TicketModel extends ModelBase
 {
-  protected $table = "ticket"; // string
   protected $errors = array(); // string[]
 
-  // public function show()
-  // {
-  //   $sql = 'SELECT * FROM '. $this->table;
-  //   $stmt = $this->pdo->query($sql);
-  //   while ($ary = $stmt->fetchAll(PDO::FETCH_ASSOC))
-  //   {
-  //     foreach ($ary as $row) {
-  //       foreach ($row as $key => $val) {
-  //         echo $key . ' ' . $val . ' ';
-  //       }
-  //       echo "<br>";
-  //     }
-  //   }
-  // }
+  public function getUserDB()
+  {
+  }
+  public function getUserTicket($user)
+  {
+    $sql = sprintf('SELECT name, title, description FROM user INNER JOIN ticket ON user.name = ticket.src_user WHERE user.name = "%s"', $user);
+    $state = $this->pdo->prepare($sql);
+    if (!$state->execute()) { echo "err execute"; exit; }
+    $res = $state->fetchAll(PDO::FETCH_ASSOC);
+    return $res;
+  }
   public function getAll()
   {
-    $sql = 'SELECT * FROM ' . $this->table;
+    $table = 'ticket';
+    $sql = 'SELECT * FROM ' . $table;
     $stmt = $this->pdo->query($sql);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
@@ -60,34 +57,64 @@ class TicketModel extends ModelBase
 
     return true;
   }
+  public function testAdd()
+  {
+    $sql = 'INSERT INTO ticket (src_user, dst_user, description) VALUES ("aa", "bb", "cc")';
+    try
+    {
+      $state = $this->pdo->prepare($sql);
+      if (!$state->execute())
+      {
+        throw new Exception("実行失敗");
+      }
+    } 
+    catch (Exception $e)
+    {
+      Log::u_log($e->getMessage());
+      exit;
+    }
+  }
+  public function delete($id)
+  {
+    $table = 'ticket';
+    $sql = sprintf('DELETE FROM %s WHERE id = :id', $table);
+    try {
+      $state = $this->pdo->prepare($sql);
+      if (!$state) { throw new Exception("err prepare"); }
+      $state->bindValue(':id', $id);
+      if (!$state->execute()) { throw new Exception("実行失敗"); }
+    } catch (Exception $e) {
+      Log::u_log($e->getMessage());
+      Log::u_log("error");
+      exit;
+    }
+  }
   public function add($post)
   {
-    $sql = sprintf('INSERT INTO %s (label, status, src_user, dst_user, title, description) VALUES (?, ?, ?, ?, ?, ?) ', $this->table);
+     $data = array(
+      // "label" => intval($post['label']),
+      // "status" => intval($post['status']),
+      "src_user" => $post['src_user'],
+      "dst_user" => $post['dst_user'],
+      "title" => $post['title'],
+      "description" => $post['description']
+      );
+
+    $table = 'ticket';
+    $bind = $this->bindString($data);
+    $sql = sprintf('INSERT INTO %s ' . $bind, $table);
+
     try {
-      $stmt = $this->pdo->prepare($sql);
-      if (!$stmt) {
-        echo $this->pdo->errorInfo();
+      $state = $this->pdo->prepare($sql);
+      if (!$state) { throw new Exception("err prepare"); }
+      foreach ($data as $key => $value) {
+        $state->bindValue(':' . $key, $value);
       }
-      $data = array((int)$post['label'], (int)$post['status'], $post['src_user'], $post['dst_user'], $post['title'], $post['description']);
-      $res = $stmt->exectute($data);
-      if (!$res) {
-        echo $this->pdo->errorInfo();
-      }
-    }catch (PDOException $e){
-      Log::m_log($e->getMessage());
-      $e->getMessage();
-      throw $e;
+      if (!$state->execute()) { throw new Exception("実行失敗"); }
+    } catch (Exception $e){
+      Log::u_log($e->getMessage());
+      Log::u_log("errror");
       exit;
     }
-
-    if (!empty($this->errors))
-    {
-      var_dump($this->errors);
-      foreach ($this->error as $error) {
-        Log::m_log($error);
-      }
-      exit;
-    }
-
   }
 }

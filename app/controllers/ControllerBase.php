@@ -35,7 +35,8 @@ abstract class ControllerBase
     }
     public function run()
     {
-        try {
+        try 
+        {
             $this->initializeView();
             $this->preAction();
             $methodName = sprintf('%sAction', $this->action);
@@ -44,11 +45,10 @@ abstract class ControllerBase
             if (file_exists($this->templatePath)) {
                 $this->view->display($this->templatePath);
             } else {
-                Log::v_log('not found template View');
+                Log::u_log('[' . $this->templatePath . '] not found template view');
             }
         } catch (SmartyException $e) {
-            // $e->message();
-            // echo $e->message;
+            Log::u_log("err: ControllerBase run");
             var_dump($e);
             exit;
         }
@@ -56,14 +56,29 @@ abstract class ControllerBase
     protected function partial($file_name)
     {
         $path = sprintf(ControllerBase::PARTIAL_PATH, $this->systemRoot, $file_name);
-        $this->view->assign($file_name, $path);
+        try{
+            $this->view->assign($file_name, $path);
+        } catch (Exception $e)
+        {
+            Log::u_log("Smarty error");
+            exit;
+        }
     }
     protected function initializeView()
     {
-        $this->view = new Smarty();
-        $this->view->template_dir = sprintf(ControllerBase::SMARTY_TEMPLATES_PATH, $this->systemRoot);
-        $this->view->compile_dir = sprintf(ControllerBase::SMARTY_TEMPLATES_C_PATH, $this->systemRoot);
-        $this->templatePath = sprintf('%s/%s.tpl', $this->controller, $this->action);
+        try 
+        {
+            $this->view = new Smarty();
+            $this->view->template_dir = sprintf(ControllerBase::SMARTY_TEMPLATES_PATH, $this->systemRoot);
+            $this->view->compile_dir = sprintf(ControllerBase::SMARTY_TEMPLATES_C_PATH, $this->systemRoot);
+            $tmp = sprintf('%s/%s.tpl', $this->controller, $this->action);
+            $this->templatePath = $this->view->template_dir[0] . $tmp;
+        } 
+        catch(Exception $e)
+        {
+            Log::u_log("Smarty error");
+            exit;
+        }
     }
     protected function preAction()
     {

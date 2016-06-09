@@ -11,4 +11,4 @@
 # primary key (id)
 # );
 # INSERT INTO ticket (src_user, dst_user, description) VALUES ("arakaki", "test", "test");
-INSERT INTO ticket (src_user, dst_user, description) VALUES ("arakaki", "test", "hoge");
+# INSERT INTO ticket (src_user, dst_user, description) VALUES ("arakaki", "test", "hoge");

@@ -4,32 +4,28 @@
 class Log
 {
   // type
-  const MODEL = 'model';
-  const VIEW = 'view';
-  const CONTROLLER = 'controller';
+  const UTIL = 'util';
 
-  static public function _log($message, $type)
+  static private function _log($message, $type)
   {
     $path = '/var/www/html/mvc/log/' . $type . '.log';
+    $dbg = debug_backtrace();
+    $dbg_msg = '[' .$dbg[2]['class'] . ' ' . $dbg[2]['function'] . '] ';
+    $timestamp =  '[' . date("H:i:s") . '] ';
+    $msg = $timestamp . $dbg_msg . $message . "\n";
+
     if (file_exists($path)) {
-      error_log($message, '3', $path);
+      error_log($msg, '3', $path);
     }
     else
     {
-      // なんかできなかったっす。
-      touch($path);
+      echo "error Log::_log";
+      exit;
     }
   }
-  static public function m_log($message)
+  static public function u_log($message)
   {
-    Log::_log($message, Log::MODEL);
+    Log::_log($message, Log::UTIL);
   }
-  static public function v_log($message)
-  {
-    Log::_log($message, Log::VIEW);
-  }
-  static public function c_log($message) 
-  {
-    Log::_log($message, Log::CONTROLLER);
-  }
+
 }

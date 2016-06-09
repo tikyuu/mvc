@@ -1,5 +1,5 @@
 {include file="$_header_bootstrap"}
-
+{include file="$_menu_ticket"}
 <div class="container">
     <h1>add_ticket</h1>
     <form method="post" action="{$send_file}">

@@ -15,6 +15,7 @@ class Dispatcher
     {
         $param = '';
 
+        // $param = $_SERVER['REQUEST_URI'];
         // セッションチェック
         if (Session::check()) {
             $param = $_SERVER['REQUEST_URI'];
@@ -53,9 +54,9 @@ class Dispatcher
             exit;
         }
 
+        // Log::u_log($controller . " " . $action);
         $controllerInstance->setSystemRoot($this->sysRoot);
         $controllerInstance->setControllerAction($controller, $action);
-
         $controllerInstance->run();
     }
 

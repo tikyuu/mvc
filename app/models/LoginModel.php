@@ -1,11 +1,10 @@
 <?php
 class LoginModel extends ModelBase
 {
-  protected $table = "user";
-
   public function show()
   {
-    $sql = 'SELECT * FROM '. $this->table;
+    $table = 'user';
+    $sql = sprintf('SELECT * FROM %s', $table);
     $stmt = $this->pdo->query($sql);
     while ($ary = $stmt->fetchAll(PDO::FETCH_ASSOC))
     {
@@ -19,15 +18,20 @@ class LoginModel extends ModelBase
   }
   public function check($user_id, $password)
   {
-    $sql = sprintf('SELECT id FROM %s WHERE name="%s" AND password="%s";', $this->table, $user_id, $password);
+    $table = 'user';
+    $sql = sprintf('SELECT id FROM %s WHERE name="%s" AND password="%s";', $table, $user_id, md5($password));
     try {
-      $stmt = $this->pdo->query($sql);
-      $res = $stmt->fetch(PDO::FETCH_ASSOC);
+      $state = $this->pdo->query($sql);
+      $res = $state->fetch(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
       $e->getMessage();
       exit;
     }
 
-    return $res;
+    if($res) {
+      return $res['id'];
+    } else {
+      return 0;
+    }
   }
 }

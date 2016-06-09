@@ -1,11 +1,10 @@
 <?php
 class TestModel extends ModelBase
 {
-  protected $table = "test";
-
   public function show()
   {
-    $ary = $this->query("SELECT * FROM " . $this->table);
+    $table = 'test';
+    $ary = $this->query("SELECT * FROM " . $table);
     foreach ($ary as $row)
     {
       echo '<form method="post" action="/Test/check">';
@@ -46,8 +45,9 @@ class TestModel extends ModelBase
   }
   public function _edit($id)
   {
+    $table = 'test';
     $bind = array('id' => $id);
-    $sql = sprintf('SELECT * FROM %s WHERE id = :id', $this->table);
+    $sql = sprintf('SELECT * FROM %s WHERE id = :id', $table);
     $query = $this->pdo->prepare($sql);
     $query->execute($bind);
     $row = $query->fetch(PDO::FETCH_ASSOC);
@@ -66,7 +66,7 @@ class TestModel extends ModelBase
   public function _update($name, $id)
   {
     $bind = array('name' => $name, 'id' => $id);
-    $sql = sprintf('UPDATE %s SET name = :name WHERE id = :id', $this->table);
+    $sql = sprintf('UPDATE %s SET name = :name WHERE id = :id', $table);
     $query = $this->pdo->prepare($sql);
     if (!$query->execute($bind)) {
       var_dump($sql);
@@ -77,18 +77,18 @@ class TestModel extends ModelBase
   }
   public function _create($name)
   {
-    if(!$this->insert(array('name' => $name))) {
-      echo "error";
-      exit;
-    }
-    header('Location: ' . '/Test/index');
+    // if(!$this->insert(array('name' => $name))) {
+    //   echo "error";
+    //   exit;
+    // }
+    // header('Location: ' . '/Test/index');
   }
   private function _delete($id)
   {
-    if (!$this->delete("id = :id", array("id" => $id))) {
-      echo "error";
-      exit;
-    }
-    header('Location: '. '/Test/index');
+    // if (!$this->delete("id = :id", array("id" => $id))) {
+    //   echo "error";
+    //   exit;
+    // }
+    // header('Location: '. '/Test/index');
   }
 }

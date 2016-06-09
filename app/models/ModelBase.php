@@ -2,7 +2,6 @@
 class ModelBase
 {
   protected $pdo;
-  protected $table;
 
   public function __construct($conf = null)
   {
@@ -30,43 +29,55 @@ class ModelBase
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $rows;
   }
-  public function insert($data)
+
+  // return: "(filed) VALUES (bind)"
+  public function bindString($data)
   {
     $fields = array();
     $values = array();
-    foreach ($data as $key => $val) {
+    foreach ($data as $key => $value) {
       $fields[] = $key;
       $values[] = ':' . $key;
     }
-    $sql = sprintf(
-      "INSERT INTO %s (%s) VALUES (%s)",
-      $this->table,
-      implode(',', $fields),
-      implode(',', $values)
-      );
-
-    $stmt = $this->pdo->prepare($sql);
-    foreach ($data as $key => $val) {
-      $stmt->bindValue(':' . $key, $val);
-    }
-    $res = $stmt->execute();
-    return $res;
+    return sprintf("(%s) VALUES (%s)", implode(',', $fields), implode(',', $values));
   }
-  public function delete($where, $params = null)
-  {
-    $sql  = sprintf("DELETE FROM %s", $this->table);
-    if ($where != "")
-    {
-      $sql .= " WHERE "  . $where;
-    }
-    $stmt = $this->pdo->prepare($sql);
-    if ($params != null) {
-      foreach ($params as $key => $val) {
-        $stmt->bindValue(':' . $key, $val);
-      }
-    }
-    $res = $stmt->execute();
+  // public function insert($data)
+  // {
+  //   $fields = array();
+  //   $values = array();
+  //   foreach ($data as $key => $val) {
+  //     $fields[] = $key;
+  //     $values[] = ':' . $key;
+  //   }
+  //   $sql = sprintf(
+  //     "INSERT INTO %s (%s) VALUES (%s)",
+  //     $this->table,
+  //     implode(',', $fields),
+  //     implode(',', $values)
+  //     );
 
-    return $res;
-  }
+  //   $stmt = $this->pdo->prepare($sql);
+  //   foreach ($data as $key => $val) {
+  //     $stmt->bindValue(':' . $key, $val);
+  //   }
+  //   $res = $stmt->execute();
+  //   return $res;
+  // }
+  // public function delete($where, $params = null)
+  // {
+  //   $sql  = sprintf("DELETE FROM %s", $this->table);
+  //   if ($where != "")
+  //   {
+  //     $sql .= " WHERE "  . $where;
+  //   }
+  //   $stmt = $this->pdo->prepare($sql);
+  //   if ($params != null) {
+  //     foreach ($params as $key => $val) {
+  //       $stmt->bindValue(':' . $key, $val);
+  //     }
+  //   }
+  //   $res = $stmt->execute();
+
+  //   return $res;
+  // }
 }

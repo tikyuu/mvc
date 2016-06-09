@@ -10,10 +10,11 @@ class Session
         session_regenerate_id(true);
         return isset($_SESSION['login']);
     }
-    static public function login()
+    static public function login($id, $name)
     {
         session_start();
-        $_SESSION['login'] = 1;
+        $_SESSION['login'] = $id;
+        $_SESSION['name'] = $name;
     }
     static public function logout()
     {
@@ -25,5 +26,22 @@ class Session
             setcookie(session_name(), '', time() - 42000, '/');
         }
         @session_destroy();
+    }
+    static public function getID()
+    {
+        if (isset($_SESSION['login'])) {
+            return $_SESSION['login'];
+        } else {
+            return 0;
+        }
+    }
+    static public function getName()
+    {
+        if (isset($_SESSION['name'])) {
+            return $_SESSION['name'];
+        } else {
+            echo "セッション失敗<br>";
+            exit;
+        }
     }
 }

@@ -5,27 +5,25 @@ class LoginController extends ControllerBase
     private $model;
     public function loginAction()
     {
-        // ログインしないと強制的にこのアクションが実行されるので、
-        // postでuserID,passwordの存在確認を行う。
         $request = new Request();
         $post = $request->getPost();
-        if (isset($post['user_id']) || isset($post['password']))
+        if (isset($post['name']) || isset($post['password']))
         {
-            if ($this->_check($post['user_id'], $post['password']))
-            {
-                Session::login();
-                header('Location: /Ticket/index');
-                exit();
-            }
-            else
+            $id = $this->_check($post['name'], $post['password']);
+            if ($id == 0)
             {
                 echo '<h2>ログインに失敗しました。</h2><br>';
             }
+            else
+            {
+                Session::login($id, $post['name']);
+                header('Location: /Ticket/home');
+                exit;
+            }
         }
-
         $this->partial("_header_bootstrap");
         $this->view->assign('send_file', '/Ticket/index');
-        $this->view->assign('res_1', 'user_id');
+        $this->view->assign('res_1', 'name');
         $this->view->assign('res_2', 'password');
     }
     private function _check($user_id, $password)
