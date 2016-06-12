@@ -33,4 +33,20 @@ $count = $pdo->exec('UPDATE people SET age = age + 1');
 PDO::prepare -> PDOStatement::bindValue -> PDOStatement::executeの３ステップでクエリを実行  
 プリペアドステートメント -> プレースホルダ  
 
+## apache
+httpd.conf
+```apache
 
+# AllowOverride controls what directives may be placed in .htaccess files.
+# it can be "All", "None", or any combination of the keywords:
+# Options FileInfo Authconfig Limit
+#
+AllowOverride None #　Allへ変更
+
+...
+
+<VirtualHost *>
+    DocumentRoot /var/www/html/mvc/app/htdocs # root指定
+</VirtualHost>
+
+```

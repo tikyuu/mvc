@@ -15,7 +15,6 @@ class Dispatcher
     {
         $param = '';
 
-        // $param = $_SERVER['REQUEST_URI'];
         // セッションチェック
         if (Session::check()) {
             $param = $_SERVER['REQUEST_URI'];
