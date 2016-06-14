@@ -1,7 +1,12 @@
+<!-- bootstrap -->
 {include file="$_header_bootstrap"}
+<!-- menu -->
 {include file="$_menu_ticket"}
+<!-- pagenation -->
+{include file="$_pagenation_ticket"}
+<!-- table -->
 <div class="container">
-    <table class="table">
+    <table class="table table-striped">
         <tbody>
             <tr>
                 {foreach from=$ary_th item=v}

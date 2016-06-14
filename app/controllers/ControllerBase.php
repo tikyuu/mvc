@@ -1,9 +1,8 @@
 <?php
 
 /*
-* Dispatcherでのシングルページのコントロールで使用
-* Dispatcher内で継承したコントローラがrunする
-* preAction内でview(tpl)に対しての処理が可能
+* viewのみ保持
+* modelは各継承先クラスで使用する場合のみ
 */
 abstract class ControllerBase
 {
@@ -17,12 +16,10 @@ abstract class ControllerBase
     protected $controller = 'index';
     protected $action = 'index';
     protected $view;
-    protected $request;
     protected $templatePath;
 
     function __construct()
     {
-        $this->request = new Request();
     }
     public function setSystemRoot($path)
     {

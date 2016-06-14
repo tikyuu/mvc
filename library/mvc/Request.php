@@ -5,13 +5,18 @@
 */
 class Request
 {
+    // POST
     private $post;
+    // GET
     private $query;
+    // URL
+    private $param;
 
     public function __construct()
     {
         $this->post = new Post();
         $this->query = new QueryString();
+        $this->param = new UrlParameter();
     }
 
     private function _request($request, $key = null)
@@ -30,5 +35,8 @@ class Request
     }
     public function getQuery($key = null) {
         return $this->_request($this->query, $key);
+    }
+    public function getParam($key = null){
+        return $this->_request($this->param, $key);
     }
 }

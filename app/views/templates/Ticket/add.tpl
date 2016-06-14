@@ -22,13 +22,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="title">題名: </label>
+                        <label for="title">タイトル: </label>
                         <input type="text" class="form-control" id="title" name="title">
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="description">※本文: </label>
+                        <label for="description">内容: </label>
                         <textarea class="form-control" id="description" name="description" rows="8"></textarea>
                         </select>
                     </div>

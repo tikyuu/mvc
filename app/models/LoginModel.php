@@ -1,25 +1,16 @@
 <?php
 class LoginModel extends ModelBase
 {
-  public function show()
+  /**
+   * ユーザ認証
+   * @param string  $user_name 
+   * @param int     $password 
+   * @return int    userID [0 = 失敗]
+   */
+  public function check($user_name, $password)
   {
     $table = 'user';
-    $sql = sprintf('SELECT * FROM %s', $table);
-    $stmt = $this->pdo->query($sql);
-    while ($ary = $stmt->fetchAll(PDO::FETCH_ASSOC))
-    {
-      foreach ($ary as $row) {
-        foreach ($row as $key => $val) {
-          echo $key . ' ' . $val . ' ';
-        }
-        echo "<br>";
-      }
-    }
-  }
-  public function check($user_id, $password)
-  {
-    $table = 'user';
-    $sql = sprintf('SELECT id FROM %s WHERE name="%s" AND password="%s";', $table, $user_id, md5($password));
+    $sql = sprintf('SELECT id FROM %s WHERE name="%s" AND password="%s";', $table, $user_name, md5($password));
     try {
       $state = $this->pdo->query($sql);
       $res = $state->fetch(PDO::FETCH_ASSOC);

@@ -2,6 +2,96 @@
 class TicketModel extends ModelBase
 {
 
+  /**
+   * チケット更新
+   * @param array-hash $data ('id', 'title', 'description')
+   */
+  public function ticketUpdate($data)
+  {
+    $table = 'ticket';
+    try
+    {
+      $sql = sprintf('
+        UPDATE
+          %s
+        SET
+          title="%s", description="%s"
+        WHERE
+          id=%d
+        ', $table, $data['title'], $data['description'], $data['id']);
+      $state = $this->pdo->prepare($sql);
+      $state->execute();
+    }
+    catch (PDOException $e)
+    {
+      echo "失敗";
+      Util::u_log($e->getMessage());
+      exit;
+    }
+  }
+  /**
+   * ユーザor全てのチケット数を取得
+   * @param int $user_id 0の場合全て取得、0以外はそのIDのユーザのチケットを取得
+   * @return int チケット数
+   */
+  public function ticketMax($user_id)
+  {
+    $table = 'ticket';
+    if ($user_id == 0)
+    {
+      $sql = sprintf('
+        SELECT
+          COUNT(*)
+        FROM
+          %s',
+        $table);
+    }
+    else
+    {
+      $sql = sprintf('
+        SELECT
+          SUM(CASE WHEN dst_user_id = %d THEN 1 ELSE 0 END) AS MAX
+        FROM
+          %s',
+        $user_id, $table);
+    }
+    $res = $this->pdo->query($sql)->fetch(PDO::FETCH_COLUMN);
+    return $res;
+  }
+  public function search($post, $check)
+  {
+    $table = 'ticket';
+    $sql = sprintf('SELECT * FROM %s WHERE ', $table);
+    if ($check == "and")
+    {
+      foreach ($post as $key => $value) {
+        $sql .= $key . ' LIKE "%' . $value . '%" AND ';
+      }
+      // 最後の' AND 'を削除
+      $sql = substr($sql, 0, -5);
+    }
+    else if($check == "or")
+    {
+      foreach ($post as $key => $value) {
+        $sql .= $key . ' LIKE "%' . $value . '%" OR ';
+      }
+      // 最後の' OR 'を削除
+      $sql = substr($sql, 0, -4);
+    }
+    try
+    {
+      $state = $this->pdo->query($sql);
+      $res = $state->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+      echo $e->getMessage();
+      Util::u_log($e->getMessage());
+      exit;
+    }
+    var_dump($res);
+    exit;
+    return $res;
+  }
+
   // @return array([id => ?, name => ?]) 
   public function getUser()
   {
@@ -25,10 +115,50 @@ class TicketModel extends ModelBase
 
     return $res;
   }
-  // @return 2次元配列 array([name => ?, title => ?, description => ?])
-  public function getUserTicket($user_id)
+
+  /**
+   * ユーザもしくはすべてのチケットをlimit_startからlimit_endまで取得する。
+   * @param int $user_id  チケットに割り振られるユーザID; 0の場合全てのチケットを調べる
+   * @param int $limit_start 存在するチケットを分割; start;
+   * @param int $limit_end 存在するチケットを分割; offset;
+   * @return tickets
+   */
+  public function getUserTicket($user_id, $limit_start = 0, $limit_end = 10)
   {
-    $sql = sprintf('SELECT ticket.id, name, title, description FROM user INNER JOIN ticket ON user.id = ticket.dst_user_id WHERE user.id = "%s" ORDER BY ticket.id DESC', $user_id);
+    if ($user_id == 0){
+      $sql = sprintf(
+        'SELECT
+          ticket.id, name, title
+        FROM
+          user
+        INNER JOIN
+          ticket
+        ON
+          user.id = ticket.dst_user_id
+        ORDER BY
+          ticket.id
+        DESC
+        LIMIT %d, %d',
+        $limit_start, $limit_end);
+    } else {
+      $sql = sprintf(
+        'SELECT
+          ticket.id, name, title
+        FROM
+          user
+        INNER JOIN
+          ticket
+        ON
+          user.id = ticket.dst_user_id
+        WHERE
+          user.id = "%s"
+        ORDER BY
+          ticket.id
+        DESC
+        LIMIT %d,%d', 
+        $user_id, $limit_start, $limit_end);
+    }
+
     $state = $this->pdo->prepare($sql);
     if (!$state->execute()) { echo "err getUserTicket"; exit; }
     $res = $state->fetchAll(PDO::FETCH_ASSOC);
@@ -118,6 +248,33 @@ class TicketModel extends ModelBase
       Log::u_log($e->getMessage());
       exit;
     }
+  }
+  /**
+   * チケット詳細取得
+   * @return array("id" => ?, "title" => ?, "description" => ?)
+   */
+  public function getTicketDetail($ticket_id)
+  {
+    try
+    {
+      $table = 'ticket';
+      $sql = sprintf('
+        SELECT 
+          id, title, description
+        FROM
+          %s
+        WHERE
+          id = %d'
+        , $table, $ticket_id);
+      $res = $this->pdo->query($sql)->fetch();
+    }
+    catch (Exception $e)
+    {
+      Util::u_log($e->getMessage());
+      exit;
+    }
+
+    return $res;
   }
   public function add($post)
   {

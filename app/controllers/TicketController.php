@@ -2,11 +2,45 @@
 <?php
 class TicketController extends ControllerBase
 {
+    const TICKET_ROW = 20; // チケット最大表示数
     private $model;
+
+    /**
+     * 全てのアクションが実行される前に必ず実行される
+     * modelめんどくさくなってここで作成
+     */
     public function preAction()
     {
         $this->model = $this->createModel('TicketModel');
     }
+
+    /**
+     * チケット詳細画面
+     * post['ticket_id']
+     */
+    public function detailAction()
+    {
+        $request = new Request();
+        $param = $request->getParam();
+        $ticket_id = $param[0];
+
+        $data = $this->model->getTicketDetail($ticket_id);
+        if(empty($data)) {
+            header('Location: /Ticket/home');
+            exit;
+        }
+
+        $this->partial('_header_bootstrap');
+        $this->partial('_menu_ticket');
+        $this->view->assign('send_file', '/Ticket/check');
+        $this->view->assign('id', $data['id']);
+        $this->view->assign('title', $data['title']);
+        $this->view->assign('description', $data['description']);
+    }
+
+    /**
+     * チケットの追加
+     */
     public function addAction()
     {
         $this->partial('_header_bootstrap');
@@ -27,6 +61,21 @@ class TicketController extends ControllerBase
         // $open_date = date('Y-m-d H:i:s');
         // $this->view->assign('open_date', $open_date);
     }
+
+    /**
+     * チケットの検索
+     */
+    public function searchAction()
+    {
+        $this->partial('_header_bootstrap');
+        $this->partial('_menu_ticket');
+        $this->view->assign('send_file', '/Ticket/check');
+    }
+
+    /**
+     * チケット操作に対してのログ画面
+     * add,deleteアクション実行時にトランザクションで追加される
+     */
     public function logAction()
     {
         $d2ary = $this->model->getLog();
@@ -36,6 +85,11 @@ class TicketController extends ControllerBase
         $this->view->assign('ary_th', $ary_th);
         $this->view->assign('d2ary', $d2ary);
     }
+
+    /**
+     * 画面内に表示されない処理分け
+     * 送られてきたpostの値を確認し、正しい場合のみLocationで分岐する
+     */
     public function checkAction()
     {
         $request = new Request();
@@ -58,50 +112,146 @@ class TicketController extends ControllerBase
             header('Location: /Ticket/home');
             exit;
         }
+        if (isset($post['search']))
+        {
+            $data = array();
+            if (!empty($post['id'])) { $data['id'] = $post['id']; }
+            if (!empty($post['title'])) { $data['title'] = $post['title']; }
+            if (!empty($post['description'])) { $data['description'] = $post['description']; }
+            if (empty($data)) { 
+                header('Location: /Ticket/serach');
+                exit;
+            }
+            $check_search = isset($post['or']) ? 'or' : 'and';
+            $res = $this->model->search($data, $check_search);
+            header('Location: /Ticket/serachResult');
+            exit;
+        }
+        if (isset($post['detail']))
+        {
+            if (isset($post['id']))
+            {
+                header('Location: /Ticket/detail/' . $post['id']);
+                exit;
+            } 
+            else 
+            {
+                header('Location: /Ticket/home');
+                exit;
+            }
+        }
+        if (isset($post['update']))
+        {
+            if (isset($post['id']))
+            {
+                $this->model->ticketUpdate($post);
+            }
+            header('Location: /Ticket/home');
+            exit;
+        }
 
-        echo 'no ID';
-        exit;
-    }
-    public function indexAction()
-    {
         header('Location: /Ticket/home');
         exit;
     }
-    public function homeAction()
-    {
-        $this->_user_check();
 
-        $d2ary = $this->model->getUserTicket(Session::getID());
-        $ary_th = array_keys($d2ary[0]);
-        $this->partial('_header_bootstrap');
-        $this->partial('_menu_ticket');
-        $this->view->assign('ary_th', $ary_th);
-        $this->view->assign('d2ary', $d2ary);
-    }  
-    public function allTicketAction()
-    {
-        $d2ary = $this->model->getAllTicket();
-        $ary_th = array_keys($d2ary[0]);
-        $this->partial('_header_bootstrap');
-        $this->partial('_menu_ticket');
-        $this->view->assign('ary_th', $ary_th);
-        $this->view->assign('d2ary', $d2ary);
-    }
-    private function _user_check()
-    {
-        echo Session::getID() . '<br>';
-        echo Session::getName() . '<br>';
-    }
-    private function _post_check()
+    public function postAction()
     {
         $request = new Request();
         $post = $request->getPost();
         var_dump($post);
         exit;
     }
-    private function _test_check()
+    /**
+     * homeへ移動される
+     */
+    public function indexAction()
     {
-        $this->model->getUser();
+        header('Location: /Ticket/home');
+        exit;
+    }
+    /**
+     * ログインユーザの全チケットを表示する
+     */
+    public function homeAction()
+    {
+        $request = new Request();
+        $user_id = Session::getID();
+        $page_send_file = '/Ticket/home';
+
+        // ユーザIDからチケットを取得
+        $this->_getTicket($request, $user_id, $page_send_file);
+    }  
+    /**
+     * 全チケットを表示する
+     */
+    public function allTicketAction()
+    {
+        $request = new Request();
+        $page_send_file = '/Ticket/allTicket';
+        
+        // 全チケット取得
+        $this->_getTicket($request, 0, $page_send_file);
+    }
+    /**
+     * @debug ユーザ情報確認用
+     */
+    private function _user_check()
+    {
+        echo Session::getID() . '<br>';
+        echo Session::getName() . '<br>';
+    }
+    /**
+     * @debug test
+     */
+    public function testAction()
+    {
+        $request = new Request();
+        $param = $request->getParam();
+        $user_id = Session::getID();
+        $page_send_file = '/Ticket/test';
+
+        // 全チケット取得
+        $this->_getTicket($request, 0, $page_send_file);
+    }
+    /**
+     * ユーザor全チケット取得
+     * @param Request $request
+     * @param int     $user_id
+     */
+    private function _getTicket($request, $user_id, $send_file)
+    {
+        // ページネーション設定
+        $param = $request->getParam();
+        $page_index = is_null($param) ? 1 : $param[0];
+        $ticket_max = $this->model->ticketMax($user_id);
+
+        // チケット設定
+        $d2ary = $this->model->getUserTicket($user_id, ($page_index - 1) * TicketController::TICKET_ROW, TicketController::TICKET_ROW);
+        $ary_th = array_keys($d2ary[0]);
+
+        // viewに追加
+        $this->partial('_header_bootstrap');
+        $this->partial('_menu_ticket');
+        $this->_partialPagenation($page_index, $ticket_max, $send_file);
+        $this->view->assign('ary_th', $ary_th);
+        $this->view->assign('d2ary', $d2ary);
+    }
+    /**
+     * ページネーション用のパーシャル作成 
+     * @param int $page_index   現在選択しているページ
+     * @param int $ticket_max   チケット最大数
+     */
+    private function _partialPagenation($page_index, $ticket_max, $send_file)
+    {
+        // (チケット数 / [表示row数]row_max) = 最大ページ数
+        $page_max = ceil(($ticket_max / TicketController::TICKET_ROW));
+        $page_ary = range(1, $page_max);
+
+        // viewに追加
+        $this->partial('_pagenation_ticket');
+        $this->view->assign('page_send_file', $send_file);
+        $this->view->assign('page_index', $page_index);
+        $this->view->assign('page_ary', $page_ary);
     }
 }
 

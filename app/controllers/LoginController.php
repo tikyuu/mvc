@@ -2,14 +2,20 @@
 <?php
 class LoginController extends ControllerBase
 {
-    private $model;
+    /**
+     * ログイン処理を行う
+     * POSTを確認しなにも入ってなればログイン画面
+     * POSTが入っていて間違っていればログイン失敗
+     * POSTが入っていてあっていれば/Ticket/indexへ
+     */
     public function loginAction()
     {
         $request = new Request();
         $post = $request->getPost();
         if (isset($post['name']) || isset($post['password']))
         {
-            $id = $this->_check($post['name'], $post['password']);
+            $model = $this->createModel('LoginModel');
+            $id = $model->check($post['name'], $post['password']);
             if ($id == 0)
             {
                 echo '<h2>ログインに失敗しました。</h2><br>';
@@ -26,11 +32,10 @@ class LoginController extends ControllerBase
         $this->view->assign('res_1', 'name');
         $this->view->assign('res_2', 'password');
     }
-    private function _check($user_id, $password)
-    {
-       $this->model = $this->createModel('LoginModel');
-       return $this->model->check($user_id, $password);
-    }
+    /**
+     * ログアウト
+     * セッション、クッキー破壊
+     */
     public function logoutAction()
     {
         Session::logout();

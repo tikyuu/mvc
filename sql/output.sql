@@ -1,0 +1,4 @@
+SELECT * FROM ticket
+  INTO OUTFILE './ticket.csv'
+  FIELDS TERMINATED BY ','
+  OPTIONALLY ENCLOSED BY '"';
