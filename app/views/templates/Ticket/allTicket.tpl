@@ -10,13 +10,13 @@
         <tbody>
             <tr>
                 {foreach from=$ary_th item=v}
-                <th>{$v}</th>
+                <th><div style="text-align:center;">{$v}</div></th>
                 {/foreach}
              </tr>
             {foreach from=$d2ary item=ary}
             <tr>
                 {foreach from=$ary key=key item=v}
-                <td>{$v}</td>
+                <td><div style="text-align:center;">{$v}</div></td>
                 {/foreach}
             {/foreach}
             </tr>

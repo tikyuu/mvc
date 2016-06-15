@@ -22,6 +22,9 @@ class Dispatcher
             $param = Dispatcher::LOGIN_URL;
         }
 
+        // getデータ消去
+        $param = substr($param, 0, strcspn($param, '?'));
+
         if (isset($param)) {
             $param = ereg_replace('/?$', '', $param);
             $param = ereg_replace('^/', '', $param);

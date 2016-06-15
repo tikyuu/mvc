@@ -13,10 +13,19 @@
                 <div class="form-horizontal">
 
                     <div class="form-group">
+                        <label for="status">ステータス: </label>
+                        <select class="form-control" id="status" name="status">
+                        {foreach from=$status item=item}
+                                <option value="{$item.id}">{$item.name}</option>
+                        {/foreach}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label for="dst_user">担当者: </label>
                         <select class="form-control" id="dst_user" name="dst_user">
-                        {foreach from=$dst_user item=user}
-                                <option value="{$user.id}">{$user.name}</option>
+                        {foreach from=$dst_user item=item}
+                                <option value="{$item.id}">{$item.name}</option>
                         {/foreach}
                         </select>
                     </div>

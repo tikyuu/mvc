@@ -2,7 +2,7 @@
 <?php
 class TicketController extends ControllerBase
 {
-    const TICKET_ROW = 20; // チケット最大表示数
+    const TICKET_ROW = 10; // チケット最大表示数
     private $model;
 
     /**
@@ -14,6 +14,43 @@ class TicketController extends ControllerBase
         $this->model = $this->createModel('TicketModel');
     }
 
+    public function emptyAction()
+    {
+        $this->partial('_header_bootstrap');
+        $this->partial('_menu_ticket');
+    }
+    /**
+     * チケットアーカイブ画面
+     * ステータスが終了になっているチケットは全てアーカイブに送られる。
+     */
+    public function archiveAction()
+    {
+        $request = new Request();
+        $user_id = Session::getID();
+        $page_send_file = '/Ticket/archive';
+
+        // チケット設定
+        $d2ary = $this->model->getArchiveTicket();
+        if (empty($d2ary)) {
+            header('Location: /Ticket/empty');
+            exit;
+        }
+
+        // ページネーション設定
+        $param = $request->getParam();
+        $page_index = is_null($param) ? 1 : $param[0];
+        $ticket_max = count($d2ary);
+
+        // $d2ary = $this->model->getUserTicket($user_id, ($page_index - 1) * TicketController::TICKET_ROW, TicketController::TICKET_ROW);
+        $ary_th = array_keys($d2ary[0]);
+
+        // viewに追加
+        $this->partial('_header_bootstrap');
+        $this->partial('_menu_ticket');
+        $this->_partialPagenation($page_index, $ticket_max, $page_send_file);
+        $this->view->assign('ary_th', $ary_th);
+        $this->view->assign('d2ary', $d2ary);
+    }
     /**
      * チケット詳細画面
      * post['ticket_id']
@@ -34,6 +71,12 @@ class TicketController extends ControllerBase
         $this->partial('_menu_ticket');
         $this->view->assign('send_file', '/Ticket/check');
         $this->view->assign('id', $data['id']);
+
+        // ステータステーブル
+        $status = $this->model->getStatus();
+        $this->view->assign('status', $status);
+        $this->view->assign('status_index', $data['status']);
+
         $this->view->assign('title', $data['title']);
         $this->view->assign('description', $data['description']);
     }
@@ -53,7 +96,11 @@ class TicketController extends ControllerBase
         $src_user_id = Session::GetID();
         $this->view->assign('src_user_id', $src_user_id);
 
-        // ユーザ
+        // ステータステーブル
+        $status = $this->model->getStatus();
+        $this->view->assign('status', $status);
+
+        // ユーザテーブル
         $dst_user = $this->model->getUser();
         $this->view->assign('dst_user', $dst_user);
 
@@ -114,17 +161,21 @@ class TicketController extends ControllerBase
         }
         if (isset($post['search']))
         {
-            $data = array();
-            if (!empty($post['id'])) { $data['id'] = $post['id']; }
-            if (!empty($post['title'])) { $data['title'] = $post['title']; }
-            if (!empty($post['description'])) { $data['description'] = $post['description']; }
+            $data = array("id" => $post['id'], "title" => $post['title'], "description" => $post['description']);
+            $data = array_filter($data);
             if (empty($data)) { 
-                header('Location: /Ticket/serach');
+                header('Location: /Ticket/search');
                 exit;
             }
             $check_search = isset($post['or']) ? 'or' : 'and';
-            $res = $this->model->search($data, $check_search);
-            header('Location: /Ticket/serachResult');
+            // $res = $this->model->search($data, $check_search);
+
+            foreach ($data as $key => $value) {
+                $get .= '&' . $key . '=' . $value;
+            }
+            $get .= '&' . $check_search . "= ";
+            $get = substr($get, 1); // 先頭の１文字削除
+            header('Location: /Ticket/searchResult?' . $get);
             exit;
         }
         if (isset($post['detail']))
@@ -153,6 +204,17 @@ class TicketController extends ControllerBase
         header('Location: /Ticket/home');
         exit;
     }
+    public function searchResultAction()
+    {
+        $request = new Request();
+        $query = $request->getQuery();
+        $check_search = isset($post['or']) ? 'or' : 'and';
+        $query = array_filter($query); 
+        $res = $this->model->search($query, $check_search);
+        var_dump($res);
+        exit;
+    }
+
 
     public function postAction()
     {

@@ -23,6 +23,25 @@
         </div>
         <!-- title -->
         <div class="form-group">
+            <label for="status">ステータス: </label>
+            <select class="form-control" id="status" name="status">
+                {foreach from=$status item=item}
+                    {if $item.id == $status_index}
+                        <option value="{$item.id}" selected>{$item.name}</option>
+                    {else}
+                        <option value="{$item.id}">{$item.name}</option>
+                    {/if}
+                {/foreach}
+            </select>
+        </div>
+
+<!--         <div class="form-group">
+            <label for="status">ステータス: </label>
+            <input type="text" class="form-control" id="status" name="status" value="{$status}">
+            </select>
+        </div>
+ -->        <!-- title -->
+        <div class="form-group">
             <label for="title">タイトル: </label>
             <input type="text" class="form-control" id="title" name="title" value="{$title}">
             </select>

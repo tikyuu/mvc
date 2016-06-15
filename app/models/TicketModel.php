@@ -15,10 +15,10 @@ class TicketModel extends ModelBase
         UPDATE
           %s
         SET
-          title="%s", description="%s"
+          title="%s", description="%s", status=%d
         WHERE
           id=%d
-        ', $table, $data['title'], $data['description'], $data['id']);
+        ', $table, $data['title'], $data['description'], $data['status'], $data['id']);
       $state = $this->pdo->prepare($sql);
       $state->execute();
     }
@@ -87,20 +87,29 @@ class TicketModel extends ModelBase
       Util::u_log($e->getMessage());
       exit;
     }
-    var_dump($res);
-    exit;
     return $res;
   }
 
-  // @return array([id => ?, name => ?]) 
+  /**
+   * ユーザテーブル取得
+   * @return array(id => ?, name => ?)
+   */
   public function getUser()
   {
     $table = 'user';
     $sql = sprintf('SELECT id, name FROM %s', $table);
-    $state = $this->pdo->prepare($sql);
-    if (!$state->execute()) { echo "err getUsers"; exit; }
-    $res = $state->fetchAll(PDO::FETCH_ASSOC);
-
+    $res = $this->pdo->query($sql)->fetchAll();
+    return $res;
+  }
+  /**
+   * ステータステーブル取得
+   * @return array(id => ?, name => ?)
+   */
+  public function getStatus()
+  {
+    $table = 'status';
+    $sql = sprintf('SELECT id, name FROM %s', $table);
+    $res = $this->pdo->query($sql)->fetchAll();
     return $res;
   }
   // @return ログ全データ 2次元配列
@@ -128,13 +137,19 @@ class TicketModel extends ModelBase
     if ($user_id == 0){
       $sql = sprintf(
         'SELECT
-          ticket.id, name, title
+          ticket.id, status.name, title
         FROM
-          user
-        INNER JOIN
           ticket
+        INNER JOIN
+          user
         ON
           user.id = ticket.dst_user_id
+        INNER JOIN
+          status
+        ON
+          status.id = ticket.status
+        WHERE
+          status.id != 3
         ORDER BY
           ticket.id
         DESC
@@ -143,15 +158,21 @@ class TicketModel extends ModelBase
     } else {
       $sql = sprintf(
         'SELECT
-          ticket.id, name, title
+          ticket.id, status.name, title
         FROM
-          user
-        INNER JOIN
           ticket
+        INNER JOIN
+          user
         ON
           user.id = ticket.dst_user_id
+        INNER JOIN
+         status
+        ON
+         status.id = ticket.status
         WHERE
           user.id = "%s"
+        AND
+          status.id != 3
         ORDER BY
           ticket.id
         DESC
@@ -165,12 +186,41 @@ class TicketModel extends ModelBase
     return $res;
   }
   // @return チケット全データ array([key => value ...])
-  public function getAllTicket()
+  // public function getAllTicket()
+  // {
+  //   $sql = '
+  //     SELECT
+  //       *
+  //     FROM
+  //       ticket
+  //     ORDER BY
+  //       id
+  //     DESC';
+  //   $stmt = $this->pdo->query($sql);
+  //   return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  // }
+  public function getArchiveTicket()
   {
-    $table = 'ticket';
-    $sql = sprintf('SELECT * FROM %s ORDER BY id DESC', $table);
-    $stmt = $this->pdo->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $sql = '
+      SELECT 
+        ticket.id, status.name, title
+      FROM
+        ticket
+      INNER JOIN
+        user
+      ON
+        user.id = ticket.dst_user_id
+      INNER JOIN
+        status
+      ON
+        status.id = ticket.status
+      WHERE
+        status = 3
+      ORDER BY
+        id
+      DESC';
+    $res = $this->pdo->query($sql)->fetchAll();
+    return $res;
   }
   public function _checkPost($post, $key, $check_empty = false)
   { 
@@ -193,15 +243,16 @@ class TicketModel extends ModelBase
   public function check($post)
   {
     $error = array();
+    $error[] = $this->_checkPost($post, 'status');
     $error[] = $this->_checkPost($post, 'src_user_id');
     $error[] = $this->_checkPost($post, 'dst_user');
     $error[] = $this->_checkPost($post, 'title');
     $error[] = $this->_checkPost($post, 'description', true);
     $error = array_filter($error);
     
-    if (!empty($this->errors))
+    if (!empty($error))
     {
-      var_dump($this->errors);
+      var_dump($error);
       exit;
     }
     return true;
@@ -260,17 +311,18 @@ class TicketModel extends ModelBase
       $table = 'ticket';
       $sql = sprintf('
         SELECT 
-          id, title, description
+          ticket.id, status, title, description
         FROM
           %s
         WHERE
-          id = %d'
+          ticket.id = %d'
         , $table, $ticket_id);
       $res = $this->pdo->query($sql)->fetch();
     }
     catch (Exception $e)
     {
       Util::u_log($e->getMessage());
+      echo "error";
       exit;
     }
 
@@ -281,6 +333,7 @@ class TicketModel extends ModelBase
       try{
         // ticket add prepare
        $data1 = array(
+        "status" => $post['status'],
         "src_user_id" => $post['src_user_id'],
         "dst_user_id" => $post['dst_user'],
         "title" => $post['title'],
@@ -300,7 +353,6 @@ class TicketModel extends ModelBase
        $bind2 = $this->bindString($data2);
        $sql2 = sprintf('INSERT INTO %s ' . $bind2, $table_log);
        $state2 = $this->pdo->prepare($sql2);
-
 
        // トランザクション
        $this->pdo->beginTransaction();

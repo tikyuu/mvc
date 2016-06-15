@@ -15,7 +15,8 @@
       <a class="btn btn-default" href="/Ticket/add"><i class="glyphicon glyphicon-plus"></i> Add</a>
       <a class="btn btn-default" href="/Ticket/add"><i class="glyphicon glyphicon-tags"></i><s> tags</s></a>
       <a class="btn btn-default" href="/Ticket/allTicket"><i class="glyphicon glyphicon-folder-open"></i> 全チケット</a>
-      <a class="btn btn-default" href="/Ticket/log"><i class="glyphicon glyphicon-book"></i> Log</a>
+      <a class="btn btn-default" href="/Ticket/log"><i class="glyphicon glyphicon-list-alt"></i> Log</a>
+      <a class="btn btn-default" href="/Ticket/archive"><i class="glyphicon glyphicon-book"></i> Archive</a>
       <a class="btn btn-default" href="/Ticket/search"><i class="glyphicon glyphicon-search"></i> search</a>
     </div>
 </div>
