@@ -117,6 +117,16 @@ class TicketController extends ControllerBase
         $this->partial('_header_bootstrap');
         $this->partial('_menu_ticket');
         $this->view->assign('send_file', '/Ticket/check');
+
+        // チケットID配列
+        $ticket_ids = $this->model->getTicketID();
+        $this->view->assign('ticket_ids', $ticket_ids);
+        // ステータステーブル
+        $statuses = $this->model->getStatus();
+        $this->view->assign('statuses', $statuses);
+        // ユーザテーブル
+        $users = $this->model->getUser();
+        $this->view->assign('users', $users);
     }
 
     /**
@@ -161,21 +171,29 @@ class TicketController extends ControllerBase
         }
         if (isset($post['search']))
         {
-            $data = array("id" => $post['id'], "title" => $post['title'], "description" => $post['description']);
-            $data = array_filter($data);
-            if (empty($data)) { 
-                header('Location: /Ticket/search');
-                exit;
+            // ID search button
+            if (isset($post['button_id']))
+            {
+                $post = array_filter($post); // 空配列削除
+                if (isset($post['ticket_id']))
+                {
+                    header('Location: /Ticket/detail/' . $post['ticket_id']);
+                    exit;
+                }
             }
-            $check_search = isset($post['or']) ? 'or' : 'and';
-            // $res = $this->model->search($data, $check_search);
-
-            foreach ($data as $key => $value) {
-                $get .= '&' . $key . '=' . $value;
+            else 
+            {
+                $post = array_filter($post); // 空配列削除
+                if (isset($post['status']) || isset($post['user']))
+                {
+                    // getデータへ変換し、searchResultへ送る
+                    $query = http_build_query($post);
+                    $location = 'Location: /Ticket/searchResult/?' . $query;
+                    header($location);
+                    exit;
+                }
             }
-            $get .= '&' . $check_search . "= ";
-            $get = substr($get, 1); // 先頭の１文字削除
-            header('Location: /Ticket/searchResult?' . $get);
+            header('Location: /Ticket/search');
             exit;
         }
         if (isset($post['detail']))
@@ -206,13 +224,28 @@ class TicketController extends ControllerBase
     }
     public function searchResultAction()
     {
-        $request = new Request();
+        // ページネーション設定
+        $request = new Request(); 
+        $param = $request->getParam();
         $query = $request->getQuery();
-        $check_search = isset($post['or']) ? 'or' : 'and';
-        $query = array_filter($query); 
-        $res = $this->model->search($query, $check_search);
-        var_dump($res);
-        exit;
+        $page_index = is_null($param) ? 1 : $param[0];
+        $d2ary = $this->model->search($query, ($page_index - 1) * TicketController::TICKET_ROW, TicketController::TICKET_ROW);
+        if (empty($d2ary)) {
+            header('Location: /Ticket/empty');
+            exit;
+        }
+        $ticket_max = $this->model->searchCount();
+        $ary_th = array_keys($d2ary[0]);
+
+        $page_send_file = '/Ticket/searchResult';
+        $query = http_build_query($query);
+
+        // viewに追加
+        $this->partial('_header_bootstrap');
+        $this->partial('_menu_ticket');
+        $this->_partialPagenation($page_index, $ticket_max, $page_send_file, $query);
+        $this->view->assign('ary_th', $ary_th);
+        $this->view->assign('d2ary', $d2ary);
     }
 
 
@@ -255,7 +288,7 @@ class TicketController extends ControllerBase
         $this->_getTicket($request, 0, $page_send_file);
     }
     /**
-     * @debug ユーザ情報確認用
+     * デバッグ ユーザ情報確認用
      */
     private function _user_check()
     {
@@ -263,7 +296,7 @@ class TicketController extends ControllerBase
         echo Session::getName() . '<br>';
     }
     /**
-     * @debug test
+     * デバッグ 全チケット表示
      */
     public function testAction()
     {
@@ -303,7 +336,7 @@ class TicketController extends ControllerBase
      * @param int $page_index   現在選択しているページ
      * @param int $ticket_max   チケット最大数
      */
-    private function _partialPagenation($page_index, $ticket_max, $send_file)
+    private function _partialPagenation($page_index, $ticket_max, $send_file, $query = null)
     {
         // (チケット数 / [表示row数]row_max) = 最大ページ数
         $page_max = ceil(($ticket_max / TicketController::TICKET_ROW));
@@ -314,6 +347,10 @@ class TicketController extends ControllerBase
         $this->view->assign('page_send_file', $send_file);
         $this->view->assign('page_index', $page_index);
         $this->view->assign('page_ary', $page_ary);
+        // ごり押しの$_GET(query)追加
+        if (!is_null($query)) {
+            $this->view->assign('query', '?' . $query);
+        }
     }
 }
 

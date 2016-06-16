@@ -1,7 +1,6 @@
 <?php
 class TicketModel extends ModelBase
 {
-
   /**
    * チケット更新
    * @param array-hash $data ('id', 'title', 'description')
@@ -58,31 +57,66 @@ class TicketModel extends ModelBase
     $res = $this->pdo->query($sql)->fetch(PDO::FETCH_COLUMN);
     return $res;
   }
-  public function search($post, $check)
+  
+  /**
+   * sqlでSQL_CALC_FOUND_ROWSを使用することにより、その後にCOUNT(*)を書かずとも、
+   * SELECT FOUND_ROWS(); で行数が取得可能になる。
+   * searchCountの対で使ってます。
+   * @param array($_POST) $data 検索自体がセレクトリストでユーザ入力ないのでセキリティは安全！
+   * @param int $limit_start テーブルスタート地点
+   * @param int $limit_end テーブルエンド地点
+   */
+  public function search($data, $limit_start, $limit_end)
   {
-    $table = 'ticket';
-    $sql = sprintf('SELECT * FROM %s WHERE ', $table);
-    if ($check == "and")
-    {
-      foreach ($post as $key => $value) {
-        $sql .= $key . ' LIKE "%' . $value . '%" AND ';
-      }
-      // 最後の' AND 'を削除
-      $sql = substr($sql, 0, -5);
+    // where check
+    if (isset($data['user']) && isset($data['status'])) {
+      $where = 'WHERE user.id = ' . $data['user'] . ' AND status.id = ' . $data['status'];
+    } else if(isset($data['user'])) {
+      $where = 'WHERE user.id = ' . $data['user'];
+    } else {
+      $where = 'WHERE status.id = ' . $data['status'];
     }
-    else if($check == "or")
-    {
-      foreach ($post as $key => $value) {
-        $sql .= $key . ' LIKE "%' . $value . '%" OR ';
-      }
-      // 最後の' OR 'を削除
-      $sql = substr($sql, 0, -4);
+    $sql = sprintf(
+      'SELECT
+      SQL_CALC_FOUND_ROWS
+        ticket.id, status.name, title
+      FROM
+        ticket
+      INNER JOIN
+        user
+      ON
+        user.id = ticket.dst_user_id
+      INNER JOIN
+        status
+      ON
+        status.id = ticket.status
+      %s
+      ORDER BY
+        ticket.id
+      DESC
+      LIMIT %d, %d',
+      $where, $limit_start, $limit_end);
+    try {
+      // $res = $this->pdo->query($sql_data)->fetchAll();
+      // $res = $this->pdo->query($sql_count)->fetch(PDO::FETCH_COLUMN);
+      $res = $this->pdo->query($sql)->fetchAll();
+    } catch(PDOException $e) {
+      echo $e->getMessage();
+      Util::u_log($e->getMessage());
+      exit;
     }
-    try
-    {
-      $state = $this->pdo->query($sql);
-      $res = $state->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
+    return $res;
+  }
+  /**
+   * 前のsqlでSQL_CALC_FOUND_ROWSを行った場合のみ有効
+   * 上記のsearch関数の後にこれを呼び出すと総数が取得できる。
+   */
+  public function searchCount()
+  {
+    $sql = 'SELECT FOUND_ROWS()';
+    try {
+      $res = $this->pdo->query($sql)->fetch(PDO::FETCH_COLUMN);
+    } catch(PDOException $e) {
       echo $e->getMessage();
       Util::u_log($e->getMessage());
       exit;
@@ -92,7 +126,7 @@ class TicketModel extends ModelBase
 
   /**
    * ユーザテーブル取得
-   * @return array(id => ?, name => ?)
+   * @return [](id => ?, name => ?)
    */
   public function getUser()
   {
@@ -102,8 +136,18 @@ class TicketModel extends ModelBase
     return $res;
   }
   /**
+   * チケットID取得
+   * @return int[]
+   */
+  public function getTicketID()
+  {
+    $sql = 'SELECT id FROM ticket';
+    $res = $this->pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
+    return $res;
+  }
+  /**
    * ステータステーブル取得
-   * @return array(id => ?, name => ?)
+   * @return [](id => ?, name => ?)
    */
   public function getStatus()
   {

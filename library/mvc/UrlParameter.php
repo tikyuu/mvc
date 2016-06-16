@@ -6,7 +6,11 @@ class UrlParameter extends RequestVariables
 {
     protected function setValues()
     {
-        $param = ereg_replace('/?$', '', $_SERVER['REQUEST_URI']);
+        /*
+         * ?のget削除。先頭の/と末尾の/削除
+        */
+        $param = mb_substr($_SERVER['REQUEST_URI'], 0, strcspn($_SERVER['REQUEST_URI'], '?'));
+        $param = ereg_replace('/?$', '', $param);
         $param = ereg_replace('^/', '', $param);
         // $param = ereg_replace('/?$', '', $_GET['param']);
         

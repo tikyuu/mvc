@@ -23,7 +23,7 @@ class Dispatcher
         }
 
         // getデータ消去
-        $param = substr($param, 0, strcspn($param, '?'));
+        $param = mb_substr($param, 0, strcspn($param, '?'));
 
         if (isset($param)) {
             $param = ereg_replace('/?$', '', $param);
