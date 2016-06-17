@@ -2,7 +2,7 @@
 <?php
 class TicketController extends ControllerBase
 {
-    const TICKET_ROW = 10; // チケット最大表示数
+    const TICKET_ROW = 3; // チケット最大表示数
     private $model;
 
     /**

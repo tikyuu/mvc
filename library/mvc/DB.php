@@ -8,12 +8,12 @@ class DB
     "password" => "arakaki"
   );
   static private $param = array(
-    PDO::MYSQL_ATTR_READ_DEFAULT_FILE => '/etc/my.cnf',
+    // PDO::MYSQL_ATTR_READ_DEFAULT_FILE => '/etc/my.cnf',
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_EMULATE_PREPARES => false,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
   );
-  static public function connect($conf)
+  static public function connect($conf = array())
   {
     $t_conf = DB::$conf;
     foreach ($conf as $key => $val)
@@ -24,7 +24,7 @@ class DB
       }
     }
     $dsn = sprintf(
-      'mysql:host=%s;dbname=%s;port=3306;',
+      'mysql:host=%s;dbname=%s;port=3306;charset=utf8',
       $t_conf['host'],
       $t_conf['dbname']
     );
