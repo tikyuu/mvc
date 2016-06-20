@@ -5,4 +5,9 @@
   <testsuite name="Sample">
     <directory>tests</directory>
   </testsuite>
+  <php>
+      <const name="DB_DSN" value="mysql:host=localhost;dbname=test" />
+      <const name="DB_USER" value="arakaki" />
+      <const name="DB_PASSWORD" value="arakaki" />
+  </php>
 </phpunit>

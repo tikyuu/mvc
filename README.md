@@ -4,7 +4,10 @@ __16/06/03 start__
 
 ## 参考
 [Objective-PHP.net](http://www.objective-php.net/)  
-[PHP で、spl_autoload_register を使って、require_once 地獄を脱出しよう](http://qiita.com/misogi@github/items/8d02f2eac9a91b4e6215)
+[PHP で、spl_autoload_register を使って、require_once 地獄を脱出しよう](http://qiita.com/misogi@github/items/8d02f2eac9a91b4e6215)  
+[jooto](https://www.jooto.com/)  
+[PHP The Right Way](http://ja.phptherightway.com/)  
+[PHPUnit 3.5.15: データベースのテストをする単純な例](https://gist.github.com/nissuk/1192791)  
 
 ## version
 - PHP 5.6.22
@@ -132,4 +135,5 @@ chown apache:apache -R mvc/app/views
 - ページネーションの作りが適当
 - チケット ログ画面が適当
 - DBの処理が適当
+- DBTestの作成
 - ...
