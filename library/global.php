@@ -1,5 +1,5 @@
 <?php
-// PHP 5.3以降のバージョンの関数を使う場合の代替関数群
+// PHP 5.4以前のバージョンの関数を使う場合の代替関数群
 
 /**
  * This file is part of the array_column library

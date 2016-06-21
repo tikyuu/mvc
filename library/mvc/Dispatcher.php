@@ -22,6 +22,8 @@ class Dispatcher
             $param = Dispatcher::LOGIN_URL;
         }
 
+// var_dump($_SESSION);
+
         // getデータ消去
         $param = mb_substr($param, 0, strcspn($param, '?'));
 
