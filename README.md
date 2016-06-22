@@ -14,17 +14,15 @@ __16/06/03 start__
 - Apache 2.2.15
 - mysql 5.1.73
 - composer 1.1.2
-- phpunit 5.4.6
 
-    
 ## 階層
 - mvc(root)
     - app               - mvc各ソースコード
-    - library           - smartyや、汎用的なソースコード
+    - library           - 汎用的なソースコード
     - log               - ログ
     - sql               - sqlテーブル確認用
     - tests         - ユニットテスト用(PHPUnit)
-    - vendor        - phpライブラリ管理用(ユニットテスト用)
+    - vendor        - phpライブラリ管理用(ユニットテスト,smartyなど)
     
 
 ## 画面
